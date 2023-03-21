@@ -20,6 +20,8 @@ Run:
 npm start
 ```
 
+Rename the file `.copy.env` to `.env`. This will read `.env` for any environment variables
+
 You can also use `Nodemon` to constantly run and not have to reload after making changes
 
 ```bash
