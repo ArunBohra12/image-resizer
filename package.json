@@ -1,0 +1,21 @@
+{
+  "name": "image-resizer",
+  "version": "1.0.0",
+  "productName": "Image Resizer",
+  "description": "Application to resize the image dimentions",
+  "scripts": {
+    "start": "electron .",
+    "dev": "nodemon --exec npm start"
+  },
+  "main": "main.js",
+  "author": "Arun Bohra",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^23.1.4",
+    "resize-img": "^2.0.0",
+    "toastify-js": "^1.12.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.21"
+  }
+}
