@@ -1,15 +1,27 @@
 const path = require('path');
-const { app, BrowserWindow, Menu } = require('electron');
+const os = require('os');
+const fs = require('fs');
+
+const { app, BrowserWindow, Menu, ipcMain, shell } = require('electron');
+
+const resizeImage = require('./utils/image');
 
 const isDev = process.env.NODE_ENV !== 'production';
 const isMac = process.platform === 'darwin';
 
+let mainWindow;
+
 // Create the main window for the application
 function createMainWindow() {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     title: 'Image Resizer',
     width: isDev ? 1000 : 500,
     height: 600,
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: true,
+      preload: path.join(__dirname, 'preload.js'),
+    },
   });
 
   // Keep dev tools open if in development mode
@@ -85,11 +97,32 @@ app.whenReady().then(function () {
   const mainMenu = Menu.buildFromTemplate(menu);
   Menu.setApplicationMenu(mainMenu);
 
+  // Remove mainWindow from memory on close
+  mainWindow.on('closed', function () {
+    mainWindow = undefined;
+  });
+
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) {
       createMainWindow();
     }
   });
+});
+
+// Respond to ipc renderer resize
+ipcMain.on('image:resize', async function (event, options) {
+  const dest = path.join(os.homedir(), 'image-resizer');
+
+  options.dest = dest;
+  const resizeImageStatus = await resizeImage(options);
+
+  if (!resizeImageStatus) {
+    mainWindow.webContents.send('image-resize:failed');
+    return;
+  }
+
+  mainWindow.webContents.send('image-resize:success');
+  shell.openPath(dest);
 });
 
 app.on('window-all-closed', function () {
